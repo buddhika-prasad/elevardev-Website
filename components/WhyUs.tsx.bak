@@ -1,0 +1,170 @@
+"use client";
+
+import { useRef, useEffect } from "react";
+import Image from "next/image";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const values = [
+  {
+    title: "Scalable Architecture",
+    description:
+      "Built to grow with your business. Our solutions are designed with scalability at the core, ensuring your platform can handle increasing loads without compromising performance.",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    title: "Clean, Maintainable Code",
+    description:
+      "We write code that stands the test of time. Clean architecture, best practices, and comprehensive documentation ensure your codebase remains maintainable and extensible.",
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    title: "Agile Development Process",
+    description:
+      "Iterative development with regular feedback loops. We deliver value incrementally, adapt to changes quickly, and keep you informed throughout the entire journey.",
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    title: "Security-First Approach",
+    description:
+      "Your data and your users' data are protected. We implement security best practices from day one, ensuring compliance and peace of mind.",
+    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    title: "Long-Term Technical Partnership",
+    description:
+      "We're not just vendors—we're your technical partners. From initial concept to ongoing support, we're committed to your long-term success.",
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop",
+  },
+];
+
+export function WhyUs() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
+  const blocksRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      gsap.set([headingRef.current, blocksRef.current?.children], {
+        opacity: 1,
+        x: 0,
+        y: 0,
+      });
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      // Heading animation
+      if (headingRef.current) {
+        gsap.fromTo(
+          headingRef.current,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headingRef.current,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+
+      // Staggered blocks - alternating sides
+      if (blocksRef.current) {
+        const blocks = gsap.utils.toArray(blocksRef.current.children);
+        blocks.forEach((block, index) => {
+          const isEven = index % 2 === 0;
+          const xFrom = isEven ? -100 : 100;
+
+          gsap.fromTo(
+            block as HTMLElement,
+            { x: xFrom, opacity: 0 },
+            {
+              x: 0,
+              opacity: 1,
+              duration: 1,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: block as HTMLElement,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
+        });
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="why-us"
+      className="py-20 sm:py-32 md:py-40"
+      style={{ backgroundColor: "var(--bg-secondary)" }}
+      aria-labelledby="why-us-heading"
+    >
+      <div className="max-w-7xl mx-auto px-4 px-5 sm:px-6 lg:px-8">
+        {/* Heading */}
+        <div ref={headingRef} className="mb-16 sm:mb-24 md:mb-32">
+          <h2
+            id="why-us-heading"
+            className="text-4xl text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[var(--text-primary)] mb-4 sm:mb-6"
+          >
+            Why <span className="gradient-text">elevardev</span>
+          </h2>
+          <p className="text-lg sm:text-xl md:text-2xl text-[var(--text-secondary)] max-w-3xl leading-[1.7] tracking-tight font-light">
+            We don't just build software—we build the foundation for your
+            digital success
+          </p>
+        </div>
+
+        {/* Staggered Story Blocks */}
+        <div ref={blocksRef} className="space-y-20 sm:space-y-32 md:space-y-40">
+          {values.map((value, index) => {
+            const isEven = index % 2 === 0;
+            return (
+              <div
+                key={value.title}
+                className={`flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16 ${
+                  isEven ? "lg:flex-row" : "lg:flex-row-reverse"
+                }`}
+              >
+                {/* Image */}
+                <div className={`relative w-full lg:w-1/2 ${isEven ? "lg:pr-8" : "lg:pl-8"}`}>
+                  <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br from-[var(--accent-indigo)]/20 to-[var(--accent-cyan)]/20">
+                    <Image
+                      src={value.image}
+                      alt={value.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1023px) 100vw, 50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/10" aria-hidden="true" />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className={`w-full lg:w-1/2 ${isEven ? "lg:pl-8" : "lg:pr-8"}`}>
+                  <h3 className="text-2xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 md:mb-8 text-[var(--text-primary)] tracking-tight leading-[1.15]">
+                    {value.title}
+                  </h3>
+                  <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[var(--text-secondary)] leading-[1.7] sm:leading-[1.8] tracking-tight font-light">
+                    {value.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

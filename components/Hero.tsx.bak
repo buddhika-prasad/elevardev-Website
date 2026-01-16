@@ -1,0 +1,283 @@
+"use client";
+
+import { useRef, useEffect } from "react";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { gsap } from "@/lib/gsap";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+export function Hero() {
+  const heroRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const line1Ref = useRef<HTMLDivElement>(null);
+  const line2Ref = useRef<HTMLDivElement>(null);
+  const line3Ref = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const noiseRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      // Line 1: "We build"
+      if (line1Ref.current) {
+        const words = line1Ref.current.querySelectorAll(".word");
+        tl.fromTo(
+          words,
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 },
+          0
+        );
+      }
+
+      // Line 2: "Digital Products" (with gradient keywords)
+      if (line2Ref.current) {
+        const words = line2Ref.current.querySelectorAll(".word");
+        tl.fromTo(
+          words,
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 },
+          0.2
+        );
+
+        // Animate gradient keywords slowly
+        const gradientWords = line2Ref.current.querySelectorAll(".gradient-word");
+        gradientWords.forEach((word) => {
+          gsap.to(word, {
+            backgroundPosition: "200% 0%",
+            duration: 4,
+            repeat: -1,
+            ease: "none",
+          });
+        });
+      }
+
+      // Line 3: "that scale & perform"
+      if (line3Ref.current) {
+        const words = line3Ref.current.querySelectorAll(".word");
+        tl.fromTo(
+          words,
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.08 },
+          0.4
+        );
+
+        // Animate gradient keywords
+        const gradientWords = line3Ref.current.querySelectorAll(".gradient-word");
+        gradientWords.forEach((word) => {
+          gsap.to(word, {
+            backgroundPosition: "200% 0%",
+            duration: 4,
+            repeat: -1,
+            ease: "none",
+          });
+        });
+      }
+
+      // Description
+      if (descriptionRef.current) {
+        tl.fromTo(
+          descriptionRef.current,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8 },
+          0.8
+        );
+      }
+
+      // Buttons
+      if (buttonsRef.current) {
+        tl.fromTo(
+          buttonsRef.current.children,
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.1 },
+          1.0
+        );
+      }
+
+      // Subtle grid parallax
+      if (gridRef.current && heroRef.current) {
+        gsap.to(gridRef.current, {
+          yPercent: 15,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      }
+
+      // Noise animation
+      if (noiseRef.current) {
+        gsap.to(noiseRef.current, {
+          backgroundPosition: "0 0, 100% 100%",
+          duration: 20,
+          repeat: -1,
+          ease: "none",
+        });
+      }
+
+      // Hero image animation
+      if (imageRef.current) {
+        gsap.fromTo(
+          imageRef.current,
+          { x: 100, opacity: 0 },
+          { x: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.6 }
+        );
+      }
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={heroRef}
+      id="hero"
+      className="relative min-h-screen flex items-center overflow-hidden pt-20"
+      aria-label="Hero section"
+    >
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Base gradient layer */}
+        <div 
+          className="absolute inset-0" 
+          style={{ backgroundColor: "var(--bg-primary)" }}
+        />
+        
+        {/* Gradient orbs with glow */}
+        <div
+          className="absolute top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full blur-3xl opacity-40 dark:opacity-30"
+          style={{
+            background: "radial-gradient(circle, rgba(99, 102, 241, 0.4), transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute bottom-1/4 -right-1/4 w-[700px] h-[700px] rounded-full blur-3xl opacity-40 dark:opacity-30"
+          style={{
+            background: "radial-gradient(circle, rgba(34, 211, 238, 0.4), transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Grid pattern */}
+        <div
+          ref={gridRef}
+          className="absolute inset-0 opacity-20 dark:opacity-10"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, var(--border) 1px, transparent 1px),
+              linear-gradient(to bottom, var(--border) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Animated noise texture */}
+        <div
+          ref={noiseRef}
+          className="absolute inset-0 opacity-5 dark:opacity-10"
+          style={{
+            backgroundImage: `
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter2)'/%3E%3C/svg%3E")
+            `,
+            backgroundSize: "200px 200px, 300px 300px",
+          }}
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* Content - Left-aligned */}
+      <div ref={containerRef} className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="max-w-4xl">
+          {/* Headline - Split into lines */}
+          <h1 className="text-4xl text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold leading-[1.05] tracking-tight mb-6 sm:mb-8">
+            {/* Line 1: "We build" */}
+            <div ref={line1Ref} className="overflow-hidden">
+              <span className="word inline-block">We</span>{" "}
+              <span className="word inline-block">build</span>
+            </div>
+
+            {/* Line 2: "Digital Products" */}
+            <div ref={line2Ref} className="overflow-hidden">
+              <span className="word inline-block">Digital</span>{" "}
+              <span className="word gradient-word inline-block gradient-text">Products</span>
+            </div>
+
+            {/* Line 3: "that scale & perform" */}
+            <div ref={line3Ref} className="overflow-hidden">
+              <span className="word inline-block">that</span>{" "}
+              <span className="word gradient-word inline-block gradient-text">scale</span>{" "}
+              <span className="word inline-block">&</span>{" "}
+              <span className="word gradient-word inline-block gradient-text">perform</span>
+            </div>
+          </h1>
+
+          {/* Description */}
+          <p
+            ref={descriptionRef}
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-[var(--text-secondary)] max-w-2xl leading-[1.7] sm:leading-[1.8] tracking-tight font-light mb-8 sm:mb-12"
+          >
+            Transforming ideas into powerful software solutions. We deliver
+            custom applications, web platforms, and mobile experiences that drive
+            growth and innovation.
+          </p>
+
+          {/* CTA Buttons */}
+          <div ref={buttonsRef} className="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 sm:gap-4">
+            <Link
+              href="/contact"
+              className="group relative px-6 py-3.5 sm:px-8 sm:py-4 md:px-10 md:py-4 bg-gradient-to-r from-[var(--accent-indigo)] to-[var(--accent-cyan)] text-white rounded-xl font-medium text-base sm:text-[15px] md:text-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2.5 tracking-tight focus:outline-none focus:ring-2 focus:ring-[var(--accent-indigo)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] overflow-hidden glow-effect hover:glow-effect touch-manipulation"
+              aria-label="Start your project with elevardev"
+            >
+              <span className="relative z-10">Start Your Project</span>
+              <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 relative z-10 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
+            </Link>
+            <Link
+              href="#services"
+              className="group relative px-6 py-3.5 sm:px-8 sm:py-4 md:px-10 md:py-4 border-2 border-[var(--border)] hover:border-[var(--accent-indigo)]/50 text-[var(--text-primary)] rounded-xl font-medium text-base sm:text-[15px] md:text-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] tracking-tight focus:outline-none focus:ring-2 focus:ring-[var(--accent-indigo)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)] touch-manipulation"
+              aria-label="View our services"
+            >
+              <span className="relative z-10">View Services</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Hero Image */}
+        <div ref={imageRef} className="relative hidden lg:block">
+          <div className="relative aspect-square rounded-2xl lg:rounded-3xl overflow-hidden bg-gradient-to-br from-[var(--accent-indigo)]/20 to-[var(--accent-cyan)]/20">
+            <Image
+              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop"
+              alt="Digital products and software solutions"
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 1023px) 0vw, (max-width: 1280px) 45vw, 50vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20" aria-hidden="true" />
+          </div>
+        </div>
+        </div>
+      </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 opacity-60 hover:opacity-100 transition-opacity duration-300">
+        <div className="w-6 h-10 border-2 border-[var(--text-secondary)] rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-[var(--text-secondary)] rounded-full mt-2 animate-bounce" />
+        </div>
+      </div>
+    </section>
+  );
+}

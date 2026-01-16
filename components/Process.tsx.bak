@@ -1,0 +1,196 @@
+"use client";
+
+import { useRef, useEffect } from "react";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const steps = [
+  {
+    title: "Discover",
+    description:
+      "We dive deep into your business needs, goals, and challenges to understand what success looks like for you.",
+  },
+  {
+    title: "Design",
+    description:
+      "Creating intuitive user experiences and beautiful interfaces that align with your brand and user expectations.",
+  },
+  {
+    title: "Build",
+    description:
+      "Agile development with regular iterations, ensuring quality code and continuous progress toward your vision.",
+  },
+  {
+    title: "Test",
+    description:
+      "Rigorous testing across devices and scenarios to ensure reliability, performance, and security.",
+  },
+  {
+    title: "Launch & Support",
+    description:
+      "Smooth deployment with monitoring, optimization, and ongoing support to keep your platform running smoothly.",
+  },
+];
+
+export function Process() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<SVGLineElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      if (lineRef.current) {
+        lineRef.current.style.strokeDashoffset = "0";
+      }
+      gsap.set([headingRef.current, timelineRef.current?.children], {
+        opacity: 1,
+        y: 0,
+      });
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      // Heading animation
+      if (headingRef.current) {
+        gsap.fromTo(
+          headingRef.current,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headingRef.current,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+
+      // Timeline line draw animation
+      if (lineRef.current && timelineRef.current) {
+        const lineLength = lineRef.current.getTotalLength();
+        lineRef.current.style.strokeDasharray = `${lineLength}`;
+        lineRef.current.style.strokeDashoffset = `${lineLength}`;
+
+        gsap.to(lineRef.current, {
+          strokeDashoffset: 0,
+          duration: 2,
+          ease: "power2.inOut",
+          scrollTrigger: {
+            trigger: timelineRef.current,
+            start: "top 75%",
+            end: "bottom 25%",
+            scrub: true,
+          },
+        });
+      }
+
+      // Step animations
+      if (timelineRef.current) {
+        const steps = timelineRef.current.querySelectorAll(".step-item");
+        steps.forEach((step, index) => {
+          gsap.fromTo(
+            step,
+            { y: 50, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: step,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            }
+          );
+        });
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="py-20 sm:py-32 md:py-40"
+      style={{ backgroundColor: "var(--bg-primary)" }}
+      aria-labelledby="process-heading"
+    >
+      <div className="max-w-7xl mx-auto px-4 px-5 sm:px-6 lg:px-8">
+        {/* Heading */}
+        <div ref={headingRef} className="mb-16 sm:mb-24 md:mb-32">
+          <h2
+            id="process-heading"
+            className="text-4xl text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[var(--text-primary)] mb-4 sm:mb-6"
+          >
+            Our <span className="gradient-text">Process</span>
+          </h2>
+          <p className="text-lg sm:text-xl md:text-2xl text-[var(--text-secondary)] max-w-3xl leading-[1.7] tracking-tight font-light">
+            A proven methodology that delivers results
+          </p>
+        </div>
+
+        {/* Timeline */}
+        <div ref={timelineRef} className="relative">
+          {/* SVG Line */}
+          <svg
+            className="absolute left-8 md:left-12 top-0 bottom-0 w-0.5 hidden md:block"
+            aria-hidden="true"
+          >
+            <line
+              ref={lineRef}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="100%"
+              stroke="url(#gradient)"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+            />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="var(--accent-indigo)" />
+                <stop offset="100%" stopColor="var(--accent-cyan)" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Steps */}
+          <div className="space-y-16 sm:space-y-24 md:space-y-32">
+            {steps.map((step, index) => (
+              <div key={step.title} className="step-item relative">
+                <div className="flex items-start gap-4 sm:gap-6 md:gap-8 lg:gap-12">
+                  {/* Step Number Circle */}
+                  <div className="flex-shrink-0 relative z-10">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[var(--accent-indigo)] to-[var(--accent-cyan)] flex items-center justify-center shadow-lg glow-effect">
+                      <span className="text-base sm:text-xl md:text-2xl font-bold text-white tracking-tight">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Step Content */}
+                  <div className="flex-1 pt-1 sm:pt-2">
+                    <h3 className="text-2xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 text-[var(--text-primary)] tracking-tight leading-[1.15]">
+                      {step.title}
+                    </h3>
+                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[var(--text-secondary)] leading-[1.7] sm:leading-[1.8] tracking-tight font-light max-w-3xl">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

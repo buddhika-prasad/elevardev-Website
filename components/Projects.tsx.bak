@@ -1,0 +1,212 @@
+"use client";
+
+import { useRef, useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+const projects = [
+  {
+    title: "Enterprise SaaS Platform",
+    description:
+      "A comprehensive cloud-based solution for enterprise resource management, serving thousands of users with real-time collaboration features.",
+    tech: ["Next.js", "Node.js", "AWS", "PostgreSQL"],
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    title: "Mobile E-Commerce App",
+    description:
+      "Native mobile application for iOS and Android with seamless shopping experience, payment integration, and real-time inventory management.",
+    tech: ["Flutter", "Firebase", "Stripe"],
+    image: "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    title: "Healthcare Management System",
+    description:
+      "Secure, HIPAA-compliant platform for healthcare providers to manage patient records, appointments, and telemedicine consultations.",
+    tech: ["React", "Python", "Docker", "MongoDB"],
+    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?q=80&w=1200&auto=format&fit=crop",
+  },
+];
+
+export function Projects() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
+  const projectsRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      // Heading animation
+      if (headingRef.current) {
+        gsap.fromTo(
+          headingRef.current,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: headingRef.current,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+
+      // Projects animation
+      if (projectsRef.current) {
+        const projectElements = gsap.utils.toArray(projectsRef.current.children);
+        gsap.fromTo(
+          projectElements,
+          { y: 60, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: projectsRef.current,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  // Cursor follow effect
+  useEffect(() => {
+    if (prefersReducedMotion || !cursorRef.current) return;
+
+    gsap.set(cursorRef.current, { xPercent: -50, yPercent: -50 });
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (cursorRef.current) {
+        gsap.to(cursorRef.current, {
+          x: e.clientX,
+          y: e.clientY,
+          duration: 0.4,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+    };
+
+    // Only track cursor when hovering over projects
+    if (hoveredIndex !== null) {
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+      return () => window.removeEventListener("mousemove", handleMouseMove);
+    }
+  }, [hoveredIndex, prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="projects"
+      className="py-32 md:py-40 relative overflow-hidden"
+      style={{ backgroundColor: "var(--bg-secondary)" }}
+      aria-labelledby="projects-heading"
+    >
+      {/* Custom cursor */}
+      <div
+        ref={cursorRef}
+        className={`fixed top-0 left-0 w-24 h-24 pointer-events-none z-50 transition-opacity duration-300 ${
+          hoveredIndex !== null && !prefersReducedMotion ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          background: "radial-gradient(circle, rgba(99, 102, 241, 0.4), rgba(34, 211, 238, 0.2) 50%, transparent 70%)",
+          borderRadius: "50%",
+          filter: "blur(20px)",
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        {/* Heading */}
+        <div ref={headingRef} className="mb-16 sm:mb-24 md:mb-32">
+          <h2
+            id="projects-heading"
+            className="text-4xl text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[var(--text-primary)] mb-4 sm:mb-6"
+          >
+            Featured <span className="gradient-text">Projects</span>
+          </h2>
+          <p className="text-lg sm:text-xl md:text-2xl text-[var(--text-secondary)] max-w-3xl leading-[1.7] tracking-tight font-light">
+            Showcasing our expertise through real-world solutions
+          </p>
+        </div>
+
+        {/* Projects Grid */}
+        <div ref={projectsRef} className="space-y-16 sm:space-y-24 md:space-y-32">
+          {projects.map((project, index) => (
+            <div
+              key={project.title}
+              className="group relative"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <Link
+                href="#"
+                className="block focus:outline-none focus:ring-2 focus:ring-[var(--accent-indigo)] focus:ring-offset-2 focus:ring-offset-[var(--bg-secondary)] rounded-2xl overflow-hidden"
+                aria-label={`View ${project.title} project`}
+              >
+                {/* Image Container */}
+                <div className="relative aspect-[16/9] overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-[var(--accent-indigo)]/10 to-[var(--accent-cyan)]/10 mb-6 sm:mb-8 md:mb-10">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, (max-width: 1280px) 85vw, 1200px"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true" />
+                </div>
+
+                {/* Content */}
+                <div className="px-0 sm:px-2">
+                  <h3 className="text-2xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 text-[var(--text-primary)] tracking-tight leading-[1.15] group-hover:translate-x-2 transition-transform duration-500 ease-out">
+                    {project.title}
+                  </h3>
+                  <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-[var(--text-secondary)] mb-4 sm:mb-6 md:mb-8 leading-[1.7] sm:leading-[1.8] tracking-tight font-light max-w-3xl">
+                    {project.description}
+                  </p>
+
+                  {/* Tech Stack */}
+                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    {project.tech.map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm md:text-base border border-[var(--border)] rounded-lg text-[var(--text-secondary)] tracking-tight font-medium hover:border-[var(--accent-indigo)]/50 transition-colors duration-300"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Link */}
+                  <div className="inline-flex items-center gap-2 text-[var(--accent-indigo)] font-medium text-base sm:text-lg md:text-xl tracking-tight group-hover:gap-4 transition-all duration-300">
+                    <span>View Case Study</span>
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
+                  </div>
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

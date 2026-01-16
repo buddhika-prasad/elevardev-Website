@@ -1,0 +1,148 @@
+"use client";
+
+import { useRef, useEffect } from "react";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+export function CTA() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLAnchorElement>(null);
+  const orb1Ref = useRef<HTMLDivElement>(null);
+  const orb2Ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      // Content animation
+      if (contentRef.current) {
+        gsap.fromTo(
+          contentRef.current.children,
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: contentRef.current,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+
+      // Button glow animation
+      if (buttonRef.current) {
+        const tl = gsap.timeline({ repeat: -1, yoyo: true, ease: "power2.inOut" });
+        tl.to(buttonRef.current, {
+          boxShadow: "0 0 40px rgba(99, 102, 241, 0.6), 0 0 80px rgba(34, 211, 238, 0.4)",
+          duration: 2,
+        });
+      }
+
+      // Floating orbs
+      if (orb1Ref.current) {
+        gsap.to(orb1Ref.current, {
+          x: "+=80",
+          y: "-=60",
+          scale: 1.2,
+          duration: 20,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      }
+
+      if (orb2Ref.current) {
+        gsap.to(orb2Ref.current, {
+          x: "-=100",
+          y: "+=70",
+          scale: 1.15,
+          duration: 25,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: 0.5,
+        });
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative py-20 sm:py-32 md:py-40 overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #050B1A 0%, #0A1225 50%, #050B1A 100%)",
+      }}
+      aria-labelledby="cta-heading"
+    >
+      {/* Animated Background Orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          ref={orb1Ref}
+          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-40"
+          style={{
+            background: "radial-gradient(circle, rgba(99, 102, 241, 0.5), transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+        <div
+          ref={orb2Ref}
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-3xl opacity-40"
+          style={{
+            background: "radial-gradient(circle, rgba(34, 211, 238, 0.5), transparent 70%)",
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 px-5 sm:px-6 lg:px-8 text-center">
+        <div ref={contentRef} className="space-y-8 sm:space-y-12 md:space-y-16">
+          <h2
+            id="cta-heading"
+            className="text-3xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.1] tracking-tight"
+          >
+            Have an idea worth building?
+          </h2>
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto leading-[1.7] tracking-tight font-light">
+            Transform your vision into reality with our expert team. Get started
+            on your next project today.
+          </p>
+          <Link
+            ref={buttonRef}
+            href="/contact"
+            className="group relative inline-flex items-center justify-center space-x-2.5 sm:space-x-3 px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 bg-gradient-to-r from-[var(--accent-indigo)] to-[var(--accent-cyan)] text-white rounded-xl font-medium text-base sm:text-lg md:text-xl transition-all duration-300 hover:scale-[1.05] active:scale-[0.98] tracking-tight focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent overflow-hidden glow-effect touch-manipulation"
+            aria-label="Get started with your project"
+          >
+            <span className="relative z-10">Get Started</span>
+            <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 relative z-10 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
